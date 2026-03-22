@@ -1,0 +1,34 @@
+openapi: 3.0.0
+info:
+  description: Service sample
+  title: Service sample
+  version: "1.0"
+
+servers:
+  - url: uservice-sample.yandex.net
+    description: production
+  - url: uservice-sample.tst.yandex.net
+    description: testing
+
+paths:
+  /hello:
+    post:
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+          required: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../definitions/hello.yaml#/components/schemas/HelloRequestBody"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "../definitions/hello.yaml#/components/schemas/HelloResponseBody"
