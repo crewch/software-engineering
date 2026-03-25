@@ -1,4 +1,4 @@
-#include "jwt_auth_factory.hpp"
+#include <infrastructure/jwt/jwt_auth_factory.hpp>
 
 namespace auth::jwt {
 

@@ -1,0 +1,70 @@
+components:
+  schemas:
+    ValidationError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [validation_error]
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              error:
+                type: string
+
+    NotFoundError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [not_found]
+        message:
+          type: string
+
+    ConflictError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [conflict]
+        message:
+          type: string
+        conflict_field:
+          type: string
+
+    InternalError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [internal_error]
+        message:
+          type: string
+
+    CarNotAvailableError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [car_not_available]
+        message:
+          type: string
+        car_id:
+          type: string
+          format: uuid
+          description: ID автомобиля
+        reason:
+          type: string
+          enum: [already_rented, maintenance, not_found]
+          description: Причина недоступности

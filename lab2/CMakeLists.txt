@@ -33,12 +33,26 @@ userver_setup_environment()
 # Common sources
 include_directories(src)
 
+file(GLOB SERVICES_SOURCES src/services/**/*.cpp)
+file(GLOB CONTROLLERS_SOURCES src/controllers/**/*.cpp)
+file(GLOB LIB_SOURCES src/lib/**/*.cpp)
+file(GLOB INFRASTRUCTURE_SOURCES src/infrastructure/**/*.cpp)
+
+
 add_library(
     ${PROJECT_NAME}_objs OBJECT
-    src/greeting.cpp #
-    src/auth/jwt_auth_checker.cpp #
-    src/auth/jwt_auth_factory.cpp #
-    src/views/hello/handler.cpp #
+    
+    # Services
+    ${SERVICES_SOURCES}
+
+    # Controllers
+    ${CONTROLLERS_SOURCES}
+
+    # Lib
+    ${LIB_SOURCES}
+
+    # Infrastructure
+    ${INFRASTRUCTURE_SOURCES}
 )
 target_link_libraries(
     ${PROJECT_NAME}_objs

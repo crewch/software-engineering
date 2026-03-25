@@ -2,7 +2,7 @@
 
 #include <userver/server/handlers/auth/auth_checker_factory.hpp>
 
-#include <auth/jwt_auth_checker.hpp>
+#include <infrastructure/jwt/jwt_auth_checker.hpp>
 
 namespace auth::jwt {
 
