@@ -132,7 +132,6 @@ CarResult CarService::CreateCar(const domain::Car& car) {
 }
 
 CarListResult CarService::GetAvailableCars(
-    const std::optional<domain::CarClass>& car_class,
     bool available_only,
     int limit,
     int offset
@@ -141,10 +140,6 @@ CarListResult CarService::GetAvailableCars(
     auto cars = storage.GetAllCars();
 
     cars = FilterByAvailability(cars, available_only);
-    
-    if (car_class.has_value()) {
-        cars = FilterByClass(cars, car_class.value());
-    }
     
     int total = 0;
     auto paginated = ApplyPagination(cars, limit, offset, total);
@@ -154,7 +149,6 @@ CarListResult CarService::GetAvailableCars(
 
 CarListResult CarService::GetCarsByClass(
     domain::CarClass car_class,
-    bool available_only,
     int limit,
     int offset
 ) {
@@ -163,19 +157,8 @@ CarListResult CarService::GetCarsByClass(
 
     cars = FilterByClass(cars, car_class);
     
-    cars = FilterByAvailability(cars, available_only);
-    
     int total = 0;
     auto paginated = ApplyPagination(cars, limit, offset, total);
-
-    if (total == 0) {
-        return {
-            CarErrorCode::NOT_FOUND,
-            "No cars found for this class",
-            {},
-            0
-        };
-    }
 
     return {CarErrorCode::OK, "", paginated, total};
 }

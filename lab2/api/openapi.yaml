@@ -170,15 +170,9 @@ paths:
   /cars/available:
     get:
       tags: [cars]
-      summary: Получение списка автомобилей
+      summary: Получение списка доступных автомобилей
       operationId: getCars
       parameters:
-        - name: car_class
-          in: query
-          required: false
-          description: Фильтр по классу автомобиля
-          schema:
-            $ref: '#/components/schemas/CarClass'
         - name: limit
           in: query
           required: false
@@ -198,7 +192,7 @@ paths:
             minimum: 0
       responses:
         '200':
-          description: Список автомобилей
+          description: Список доступных автомобилей
           content:
             application/json:
               schema:
@@ -228,13 +222,6 @@ paths:
           description: Класс автомобиля для поиска
           schema:
             $ref: '#/components/schemas/CarClass'
-        - name: available
-          in: query
-          required: false
-          description: Только доступные автомобили
-          schema:
-            type: boolean
-            default: true
         - name: limit
           in: query
           required: false
@@ -265,12 +252,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-        '404':
-          description: Автомобили указанного класса не найдены
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NotFoundError'
         '500':
           description: Внутренняя ошибка сервера
           content:

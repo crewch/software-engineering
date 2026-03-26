@@ -82,7 +82,6 @@ userver::formats::json::Value BuildCarListJson(
     userver::formats::json::ValueBuilder builder;
     
     userver::formats::json::ValueBuilder items_builder;
-    items_builder.PushBack(cars.size());
     
     for (const auto& car : cars) {
         items_builder.PushBack(BuildCarJson(car));
@@ -111,13 +110,6 @@ userver::formats::json::Value BuildValidationErrorJson(
         builder["details"] = details_builder.ExtractValue();
     }
     
-    return builder.ExtractValue();
-}
-
-userver::formats::json::Value BuildNotFoundErrorJson(const std::string& message) {
-    userver::formats::json::ValueBuilder builder;
-    builder["code"] = "not_found";
-    builder["message"] = message;
     return builder.ExtractValue();
 }
 
@@ -173,14 +165,6 @@ QueryIntResult ParseQueryInt(
     }
 }
 
-bool ParseQueryBool(const std::string& value, bool default_value) {
-    if (value.empty()) {
-        return default_value;
-    }
-    
-    return (value == "true" || value == "1" || value == "yes");
-}
-
 } // anonymous namespace
 
 
@@ -209,8 +193,6 @@ std::string GetCarsByClass::HandleRequestThrow(
             )
         );
     }
-
-    bool available_only = ParseQueryBool(request.GetArg("available"), true);
     
     auto limit_result = ParseQueryInt(
         "limit",
@@ -244,7 +226,6 @@ std::string GetCarsByClass::HandleRequestThrow(
 
     const auto result = services::CarService::GetCarsByClass(
         car_class.value(),
-        available_only,
         limit_result.value,
         offset_result.value
     );
@@ -254,12 +235,6 @@ std::string GetCarsByClass::HandleRequestThrow(
             request.SetResponseStatus(userver::server::http::HttpStatus::kOk);
             return userver::formats::json::ToString(
                 BuildCarListJson(result.cars, result.total)
-            );
-
-        case services::CarErrorCode::NOT_FOUND:
-            request.SetResponseStatus(userver::server::http::HttpStatus::kNotFound);
-            return userver::formats::json::ToString(
-                BuildNotFoundErrorJson(result.message)
             );
 
         case services::CarErrorCode::VALIDATION_ERROR:

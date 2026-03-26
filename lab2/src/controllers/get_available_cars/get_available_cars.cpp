@@ -10,8 +10,9 @@
 #include <userver/utils/datetime/timepoint_tz.hpp>
 #include <userver/utils/datetime.hpp>
 
-#include <optional>
 #include <string_view>
+#include <limits>
+#include <fmt/format.h>
 
 namespace car_rental::components {
 
@@ -21,25 +22,6 @@ constexpr int kDefaultLimit = 20;
 constexpr int kMinLimit = 1;
 constexpr int kMaxLimit = 100;
 constexpr int kMinOffset = 0;
-
-std::optional<domain::CarClass> ParseCarClass(const std::string& value) {
-    if (value.empty()) {
-        return std::nullopt;
-    }
-    
-    static const std::unordered_map<std::string, domain::CarClass> kClassMap = {
-        {"economy", domain::CarClass::economy},
-        {"compact", domain::CarClass::compact},
-        {"midsize", domain::CarClass::midsize},
-        {"fullsize", domain::CarClass::fullsize},
-        {"luxury", domain::CarClass::luxury},
-        {"suv", domain::CarClass::suv},
-        {"van", domain::CarClass::van}
-    };
-    
-    auto it = kClassMap.find(value);
-    return (it != kClassMap.end()) ? std::make_optional(it->second) : std::nullopt;
-}
 
 std::string CarClassToString(domain::CarClass car_class) {
     static const std::unordered_map<domain::CarClass, std::string> kClassMap = {
@@ -173,21 +155,6 @@ GetAvailableCars::GetAvailableCars(
 std::string GetAvailableCars::HandleRequestThrow(
     const userver::server::http::HttpRequest& request,
     userver::server::request::RequestContext&) const {
-    std::optional<domain::CarClass> car_class;
-    std::string class_str = request.GetArg("car_class");
-    if (!class_str.empty()) {
-        car_class = ParseCarClass(class_str);
-        if (!car_class.has_value()) {
-            request.SetResponseStatus(userver::server::http::HttpStatus::kBadRequest);
-            return userver::formats::json::ToString(
-                BuildValidationErrorJson(
-                    "Invalid car_class value",
-                    "car_class"
-                )
-            );
-        }
-    }
-    
     auto limit_result = ParseQueryInt(
         "limit",
         request.GetArg("limit"),
@@ -219,7 +186,7 @@ std::string GetAvailableCars::HandleRequestThrow(
     }
 
     const auto result = services::CarService::GetAvailableCars(
-        car_class,
+        true,
         limit_result.value,
         offset_result.value
     );

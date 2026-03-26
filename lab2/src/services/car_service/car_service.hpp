@@ -32,7 +32,6 @@ public:
     static CarResult CreateCar(const domain::Car& car);
     
     static CarListResult GetAvailableCars(
-        const std::optional<domain::CarClass>& car_class,
         bool available_only = true,
         int limit = 20,
         int offset = 0
@@ -40,7 +39,6 @@ public:
     
     static CarListResult GetCarsByClass(
         domain::CarClass car_class,
-        bool available_only = true,
         int limit = 20,
         int offset = 0
     );
