@@ -2,27 +2,11 @@
 
 #include <infrastructure/in_memory_storage/in_memory_storage.hpp>
 
-#include <regex>
 #include <algorithm>
 
 namespace car_rental::services {
 
 namespace {
-
-constexpr int VIN_LENGTH = 17;
-constexpr int BRAND_MAX_LENGTH = 50;
-constexpr int MODEL_MAX_LENGTH = 50;
-constexpr int MIN_YEAR = 1900;
-constexpr int MAX_YEAR = 2030;
-
-bool IsValidVin(const std::string& vin) {
-    if (vin.length() != VIN_LENGTH) {
-        return false;
-    }
-    static const std::regex vin_pattern("^[A-HJ-NPR-Z0-9]{17}$");
-    return std::regex_match(vin, vin_pattern);
-}
-
 std::vector<domain::Car> FilterByAvailability(
     const std::vector<domain::Car>& cars,
     bool available_only
@@ -35,7 +19,7 @@ std::vector<domain::Car> FilterByAvailability(
     filtered.reserve(cars.size());
     
     for (const auto& car : cars) {
-        if (car.available) {
+        if (car.IsAvailable()) {
             filtered.push_back(car);
         }
     }
@@ -51,7 +35,7 @@ std::vector<domain::Car> FilterByClass(
     filtered.reserve(cars.size());
     
     for (const auto& car : cars) {
-        if (car.car_class == car_class) {
+        if (car.GetCarClass() == car_class) {
             filtered.push_back(car);
         }
     }
@@ -75,51 +59,45 @@ std::vector<domain::Car> ApplyPagination(
     return std::vector<domain::Car>(cars.begin() + offset, cars.begin() + end);
 }
 
+std::string dtoCarClassToString(lab2::car::CarClass сarClass) {
+    switch (сarClass) {
+        case lab2::car::CarClass::kEconomy:  return "economy";
+        case lab2::car::CarClass::kCompact:  return "compact";
+        case lab2::car::CarClass::kMidsize:  return "midsize";
+        case lab2::car::CarClass::kFullsize: return "fullsize";
+        case lab2::car::CarClass::kLuxury:   return "luxury";
+        case lab2::car::CarClass::kSuv:      return "suv";
+        case lab2::car::CarClass::kVan:      return "van";
+        default: return "unknown";
+    }
+}
 } // anonymous namespace
 
-CarResult CarService::CreateCar(const domain::Car& car) {
-    if (!IsValidVin(car.vin)) {
+
+CarResult CarService::CreateCar(const lab2::car::CreateCarRequest& dto) {
+    auto car_result = domain::Car::Create(
+        dto.vin,
+        dto.brand,
+        dto.model,
+        dto.year,
+        domain::Car::CarClassFromString(dtoCarClassToString(dto.car_class)),
+        dto.license_plate,
+        dto.daily_rate
+    );
+
+    if (std::holds_alternative<exceptions::domain::ValidationError>(car_result)) {
+        const auto& error = std::get<exceptions::domain::ValidationError>(car_result);
         return {
             CarErrorCode::VALIDATION_ERROR,
-            "VIN must be 17 characters (A-H, J-N, P, R, S, T, V, Z, 0-9)",
-            std::nullopt
-        };
-    }
-    
-    if (car.brand.empty() || car.brand.length() > BRAND_MAX_LENGTH) {
-        return {
-            CarErrorCode::VALIDATION_ERROR,
-            "Brand must be 1-50 characters",
-            std::nullopt
-        };
-    }
-    
-    if (car.model.empty() || car.model.length() > MODEL_MAX_LENGTH) {
-        return {
-            CarErrorCode::VALIDATION_ERROR,
-            "Model must be 1-50 characters",
-            std::nullopt
-        };
-    }
-    
-    if (car.year < MIN_YEAR || car.year > MAX_YEAR) {
-        return {
-            CarErrorCode::VALIDATION_ERROR,
-            "Year must be between 1900 and 2030",
-            std::nullopt
-        };
-    }
-    
-    if (car.daily_rate < 0) {
-        return {
-            CarErrorCode::VALIDATION_ERROR,
-            "Daily rate must be >= 0",
+            error.message,
             std::nullopt
         };
     }
 
+    const auto& car = std::get<domain::Car>(car_result);
+
     auto& storage = storage::InMemoryStorage::Instance();
-    
+
     if (!storage.CreateCar(car)) {
         return {
             CarErrorCode::CONFLICT,

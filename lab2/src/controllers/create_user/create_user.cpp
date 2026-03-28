@@ -1,6 +1,7 @@
 #include "create_user.hpp"
 
 #include <services/user_service/user_service.hpp>
+#include <lib/json_builders/json_builders.hpp>
 #include <domain/user.hpp>
 
 #include <userver/server/http/http_status.hpp>
@@ -13,73 +14,9 @@
 #include <string>
 #include <optional>
 
+#include <docs/definitions/user.hpp>
+
 namespace car_rental::components {
-
-namespace {
-
-userver::formats::json::Value BuildUserJson(const domain::User& user) {
-    userver::formats::json::ValueBuilder builder;
-    
-    builder["id"] = user.id;
-    builder["login"] = user.login;
-    builder["first_name"] = user.first_name;
-    builder["last_name"] = user.last_name;
-    builder["email"] = user.email;
-    
-    if (user.phone.has_value()) {
-        builder["phone"] = user.phone.value();
-    } else {
-        builder["phone"] = nullptr;
-    }
-    
-    builder["created_at"] = userver::utils::datetime::TimePointTz(user.created_at);
-    
-    return builder.ExtractValue();
-}
-
-userver::formats::json::Value BuildValidationErrorJson(
-    const std::string& message,
-    const std::string& field = ""
-) {
-    userver::formats::json::ValueBuilder builder;
-    builder["code"] = "validation_error";
-    builder["message"] = message;
-    
-    if (!field.empty()) {
-        userver::formats::json::ValueBuilder details_builder;
-        userver::formats::json::ValueBuilder detail_builder;
-        detail_builder["field"] = field;
-        detail_builder["error"] = "invalid_value";
-        details_builder.PushBack(detail_builder.ExtractValue());
-        builder["details"] = details_builder.ExtractValue();
-    }
-    
-    return builder.ExtractValue();
-}
-
-userver::formats::json::Value BuildConflictErrorJson(
-    const std::string& message,
-    const std::string& field = ""
-) {
-    userver::formats::json::ValueBuilder builder;
-    builder["code"] = "conflict";
-    builder["message"] = message;
-    
-    if (!field.empty()) {
-        builder["conflict_field"] = field;
-    }
-    
-    return builder.ExtractValue();
-}
-
-userver::formats::json::Value BuildInternalErrorJson(const std::string& message) {
-    userver::formats::json::ValueBuilder builder;
-    builder["code"] = "internal_error";
-    builder["message"] = message;
-    return builder.ExtractValue();
-}
-
-} // anonymous namespace
 
 CreateUser::CreateUser(
     const userver::components::ComponentConfig& config,
@@ -90,44 +27,60 @@ CreateUser::CreateUser(
 std::string CreateUser::HandleRequestThrow(
     const userver::server::http::HttpRequest& request,
     userver::server::request::RequestContext&) const {
-    const auto& body = request.RequestBody();
-    const auto json = userver::formats::json::FromString(body);
 
-    std::string login = json["login"].As<std::string>();
-    std::string first_name = json["first_name"].As<std::string>();
-    std::string last_name = json["last_name"].As<std::string>();
-    std::string email = json["email"].As<std::string>();
-    std::string password = json["password"].As<std::string>();
+    request.GetHttpResponse().SetContentType(
+        userver::http::content_type::kApplicationJson
+    );
     
-    std::string phone;
-    if (json.HasMember("phone") && !json["phone"].IsNull()) {
-        phone = json["phone"].As<std::string>();
+    userver::formats::json::Value request_json;
+    try {
+        request_json = userver::formats::json::FromString(request.RequestBody());
+    } catch (const userver::formats::json::Exception& e) {
+        request.SetResponseStatus(userver::server::http::HttpStatus::kBadRequest);
+        return userver::formats::json::ToString(
+            utils::JsonBuilders::BuildValidationErrorJson(
+                "Invalid JSON format: " + std::string(e.what())
+            )
+        );
+    }
+
+    lab2::user::CreateUserRequest create_user_dto;
+    try {
+        create_user_dto = request_json.As<lab2::user::CreateUserRequest>();
+    } catch (const userver::formats::json::Exception& e) {
+        request.SetResponseStatus(userver::server::http::HttpStatus::kBadRequest);
+        return userver::formats::json::ToString(
+            utils::JsonBuilders::BuildValidationErrorJson(
+                "Validation error: " + std::string(e.what())
+            )
+        );
     }
 
     const auto result = services::UserService::CreateUser(
-        login,
-        first_name,
-        last_name,
-        email,
-        phone,
-        password
+        create_user_dto
     );
 
     switch (result.code) {
         case services::UserErrorCode::OK:
             request.SetResponseStatus(userver::server::http::HttpStatus::kCreated);
-            return userver::formats::json::ToString(BuildUserJson(*result.user));
+            return userver::formats::json::ToString(
+                utils::JsonBuilders::BuildUserJson(*result.user)
+            );
 
         case services::UserErrorCode::VALIDATION_ERROR:
             request.SetResponseStatus(userver::server::http::HttpStatus::kBadRequest);
             return userver::formats::json::ToString(
-                BuildValidationErrorJson(result.message)
+                utils::JsonBuilders::BuildValidationErrorJson(
+                    result.message
+                )
             );
 
         case services::UserErrorCode::CONFLICT:
             request.SetResponseStatus(userver::server::http::HttpStatus::kConflict);
             return userver::formats::json::ToString(
-                BuildConflictErrorJson(result.message, "login")
+                 utils::JsonBuilders::BuildConflictErrorJson(
+                    result.message
+                )
             );
 
         default:
@@ -135,7 +88,9 @@ std::string CreateUser::HandleRequestThrow(
                 userver::server::http::HttpStatus::kInternalServerError
             );
             return userver::formats::json::ToString(
-                BuildInternalErrorJson("Unexpected error occurred")
+                utils::JsonBuilders::BuildInternalErrorJson(
+                    "Unexpected error occurred"
+                )
             );
     }
 }

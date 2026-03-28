@@ -9,16 +9,16 @@ InMemoryStorage& InMemoryStorage::Instance() {
 bool InMemoryStorage::CreateUser(const domain::User& user) {
     std::lock_guard<std::mutex> lock(mutex_);
     
-    if (users_.find(user.login) != users_.end()) {
+    if (users_.find(user.GetLogin()) != users_.end()) {
         return false;
     }
     
-    if (users_by_id_.find(user.id) != users_by_id_.end()) {
+    if (users_by_id_.find(user.GetId()) != users_by_id_.end()) {
         return false;
     }
 
-    users_[user.login] = user;
-    users_by_id_[user.id] = user;
+    users_[user.GetLogin()] = user;
+    users_by_id_[user.GetId()] = user;
     
     return true;
 }
@@ -47,8 +47,8 @@ std::vector<domain::User> InMemoryStorage::SearchUsers(const std::string& name_m
     
     for (const auto& [login, user] : users_) {
         if (mask_empty ||
-            user.first_name.find(name_mask) != std::string::npos ||
-            user.last_name.find(name_mask) != std::string::npos) {
+            user.GetFirstName().find(name_mask) != std::string::npos ||
+            user.GetLastName().find(name_mask) != std::string::npos) {
             result.push_back(user);
         }
     }
@@ -64,18 +64,18 @@ bool InMemoryStorage::UserExists(const std::string& id) {
 bool InMemoryStorage::CreateCar(const domain::Car& car) {
     std::lock_guard<std::mutex> lock(mutex_);
     
-    if (cars_by_vin_.find(car.vin) != cars_by_vin_.end()) {
+    if (cars_by_vin_.find(car.GetVin()) != cars_by_vin_.end()) {
         return false;
     }
     
-    if (cars_.find(car.id) != cars_.end()) {
+    if (cars_.find(car.GetId()) != cars_.end()) {
         return false;
     }
 
-    cars_[car.id] = car;
-    cars_by_vin_[car.vin] = car;
+    cars_[car.GetId()] = car;
+    cars_by_vin_[car.GetVin()] = car;
     
-    cars_by_class_.emplace(car.car_class, car.id);
+    cars_by_class_.emplace(car.GetCarClass(), car.GetId());
     
     return true;
 }
@@ -100,7 +100,7 @@ std::vector<domain::Car> InMemoryStorage::GetAvailableCars() {
     result.reserve(cars_.size());
     
     for (const auto& [id, car] : cars_) {
-        if (car.available) {
+        if (car.IsAvailable()) {
             result.push_back(car);
         }
     }
@@ -122,14 +122,14 @@ std::vector<domain::Car> InMemoryStorage::SearchCars(
         for (auto it = range.first; it != range.second; ++it) {
             auto car_it = cars_.find(it->second);
             if (car_it != cars_.end()) {
-                if (!available_only || car_it->second.available) {
+                if (!available_only || car_it->second.IsAvailable()) {
                     result.push_back(car_it->second);
                 }
             }
         }
     } else {
         for (const auto& [id, car] : cars_) {
-            if (!available_only || car.available) {
+            if (!available_only || car.IsAvailable()) {
                 result.push_back(car);
             }
         }
@@ -160,11 +160,11 @@ bool InMemoryStorage::UpdateCarAvailability(const std::string& id, bool availabl
         return false;
     }
     
-    it->second.available = available;
+    it->second.SetAvailable(available);
     
-    auto vin_it = cars_by_vin_.find(it->second.vin);
+    auto vin_it = cars_by_vin_.find(it->second.GetVin());
     if (vin_it != cars_by_vin_.end()) {
-        vin_it->second.available = available;
+        vin_it->second.SetAvailable(available);
     }
     
     return true;
@@ -178,14 +178,14 @@ bool InMemoryStorage::CarExists(const std::string& id) {
 bool InMemoryStorage::CreateRental(const domain::Rental& rental) {
     std::lock_guard<std::mutex> lock(mutex_);
     
-    if (rentals_.find(rental.id) != rentals_.end()) {
+    if (rentals_.find(rental.GetId()) != rentals_.end()) {
         return false;
     }
 
-    rentals_[rental.id] = rental;
+    rentals_[rental.GetId()] = rental;
     
-    rentals_by_user_.emplace(rental.user_id, rental.id);
-    rentals_by_car_.emplace(rental.car_id, rental.id);
+    rentals_by_user_.emplace(rental.GetUserId(), rental.GetId());
+    rentals_by_car_.emplace(rental.GetCarId(), rental.GetId());
     
     return true;
 }
@@ -208,7 +208,7 @@ std::vector<domain::Rental> InMemoryStorage::GetActiveRentalsByUserId(
     for (auto it = range.first; it != range.second; ++it) {
         auto rental_it = rentals_.find(it->second);
         if (rental_it != rentals_.end() &&
-            rental_it->second.status == domain::RentalStatus::active) {
+            rental_it->second.GetStatus() == domain::RentalStatus::active) {
             result.push_back(rental_it->second);
         }
     }
@@ -227,7 +227,7 @@ std::vector<domain::Rental> InMemoryStorage::GetRentalHistoryByUserId(
     for (auto it = range.first; it != range.second; ++it) {
         auto rental_it = rentals_.find(it->second);
         if (rental_it != rentals_.end() &&
-            rental_it->second.status == domain::RentalStatus::completed) {
+            rental_it->second.GetStatus() == domain::RentalStatus::completed) {
             result.push_back(rental_it->second);
         }
     }
@@ -261,12 +261,11 @@ bool InMemoryStorage::CompleteRental(const std::string& id) {
         return false;
     }
     
-    if (it->second.status != domain::RentalStatus::active) {
+    if (it->second.GetStatus() != domain::RentalStatus::active) {
         return false;
     }
     
-    it->second.status = domain::RentalStatus::completed;
-    it->second.end_date = std::chrono::system_clock::now();
+    it->second.SetStatus(domain::RentalStatus::completed);
     
     return true;
 }
@@ -285,11 +284,11 @@ bool InMemoryStorage::IsCarAvailable(
         if (rental_it != rentals_.end()) {
             const auto& rental = rental_it->second;
             
-            if (rental.status != domain::RentalStatus::active) {
+            if (rental.GetStatus() != domain::RentalStatus::active) {
                 continue;
             }
             
-            if (start < rental.end_date && end > rental.start_date) {
+            if (start < rental.GetEndDate() && end > rental.GetStartDate()) {
                 return false;
             }
         }

@@ -5,9 +5,43 @@ components:
       enum: [active, completed, cancelled]
       description: Статус аренды
 
-    RentalBase:
+    Rental:
       type: object
-      additionalProperties: false
+      required:
+        - id
+        - user_id
+        - car_id
+        - start_date
+        - end_date
+        - total_cost
+        - status
+        - created_at
+      properties:
+        id:
+          $ref: 'common.yaml#/components/schemas/UUID'
+        user_id:
+          $ref: 'common.yaml#/components/schemas/UUID'
+          description: ID пользователя
+        car_id:
+          $ref: 'common.yaml#/components/schemas/UUID'
+          description: ID автомобиля
+        start_date:
+          $ref: 'common.yaml#/components/schemas/DateTime'
+          description: Начало аренды
+        end_date:
+          $ref: 'common.yaml#/components/schemas/DateTime'
+          description: Ожидаемое окончание аренды
+        total_cost:
+          type: number
+          minimum: 0
+          description: Общая стоимость аренды
+        status:
+          $ref: '#/components/schemas/RentalStatus'
+        created_at:
+          $ref: 'common.yaml#/components/schemas/DateTime'
+
+    CreateRentalRequest:
+      type: object
       required:
         - user_id
         - car_id
@@ -26,42 +60,3 @@ components:
         end_date:
           $ref: 'common.yaml#/components/schemas/DateTime'
           description: Ожидаемое окончание аренды
-
-    Rental:
-      allOf:
-        - $ref: '#/components/schemas/RentalBase'
-        - type: object
-          required:
-            - id
-            - status
-            - total_cost
-            - created_at
-          properties:
-            id:
-              $ref: 'common.yaml#/components/schemas/UUID'
-            actual_return_date:
-              $ref: 'common.yaml#/components/schemas/DateTime'
-              description: Фактическая дата возврата (для завершённых аренд)
-            total_cost:
-              type: number
-              minimum: 0
-              description: Общая стоимость аренды
-            status:
-              $ref: '#/components/schemas/RentalStatus'
-            created_at:
-              $ref: 'common.yaml#/components/schemas/DateTime'
-
-    CreateRentalRequest:
-      $ref: '#/components/schemas/RentalBase'
-
-    RentalListResponse:
-      type: object
-      required: [items, total]
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/Rental'
-        total:
-          type: integer
-          description: Общее количество аренд

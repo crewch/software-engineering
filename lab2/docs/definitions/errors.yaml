@@ -9,15 +9,6 @@ components:
           enum: [validation_error]
         message:
           type: string
-        details:
-          type: array
-          items:
-            type: object
-            properties:
-              field:
-                type: string
-              error:
-                type: string
 
     NotFoundError:
       type: object
@@ -37,8 +28,6 @@ components:
           type: string
           enum: [conflict]
         message:
-          type: string
-        conflict_field:
           type: string
 
     InternalError:
@@ -60,10 +49,6 @@ components:
           enum: [car_not_available]
         message:
           type: string
-        car_id:
-          type: string
-          format: uuid
-          description: ID автомобиля
         reason:
           type: string
           enum: [already_rented, maintenance, not_found]

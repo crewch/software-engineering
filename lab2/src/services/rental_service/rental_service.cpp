@@ -30,21 +30,31 @@ double CalculateTotalCost(double daily_rate, int days) {
 } // anonymous namespace
 
 RentalResult RentalService::CreateRental(
-    const std::string& user_id,
-    const std::string& car_id,
-    std::chrono::system_clock::time_point start_date,
-    std::chrono::system_clock::time_point end_date
-) {
-    if (start_date >= end_date) {
+    const lab2::rental::CreateRentalRequest& dto
+) {  
+    std::string user_id = boost::uuids::to_string(dto.user_id);
+    std::string car_id = boost::uuids::to_string(dto.car_id);
+
+    auto rental_result = domain::Rental::Create(
+        user_id,
+        car_id,
+        dto.start_date,
+        dto.end_date
+    );
+
+    if (std::holds_alternative<exceptions::domain::ValidationError>(rental_result)) {
+        const auto& error = std::get<exceptions::domain::ValidationError>(rental_result);
+
         return {
             RentalErrorCode::VALIDATION_ERROR,
-            "End date must be after start date",
+            error.message,
             std::nullopt
         };
     }
-    
+
+    auto& rental = std::get<domain::Rental>(rental_result);
+
     auto& storage = storage::InMemoryStorage::Instance();
-    
     if (!storage.UserExists(user_id)) {
         return {
             RentalErrorCode::NOT_FOUND,
@@ -62,7 +72,7 @@ RentalResult RentalService::CreateRental(
         };
     }
     
-    if (!storage.IsCarAvailable(car_id, start_date, end_date)) {
+    if (!storage.IsCarAvailable(car_id, rental.GetStartDate(), rental.GetEndDate())) {
         return {
             RentalErrorCode::CAR_NOT_AVAILABLE,
             "Car is not available for selected period",
@@ -70,19 +80,9 @@ RentalResult RentalService::CreateRental(
         };
     }
     
-    const int days = CalculateDays(start_date, end_date);
-    const double total_cost = CalculateTotalCost(car->daily_rate, days);
-    
-    domain::Rental rental;
-    rental.id = generateUUID();
-    rental.user_id = user_id;
-    rental.car_id = car_id;
-    rental.start_date = start_date;
-    rental.end_date = end_date;
-    rental.actual_return_date = std::nullopt;
-    rental.total_cost = total_cost;
-    rental.status = domain::RentalStatus::active;
-    rental.created_at = std::chrono::system_clock::now();
+    const int days = CalculateDays(rental.GetStartDate(), rental.GetEndDate());
+    const double total_cost = CalculateTotalCost(car->GetDailyRate(), days);
+    rental.RecalculateCost(total_cost);
     
     if (!storage.CreateRental(rental)) {
         return {
@@ -166,7 +166,7 @@ RentalResult RentalService::CompleteRental(const std::string& id) {
         };
     }
     
-    if (rental->status != domain::RentalStatus::active) {
+    if (rental->GetStatus() != domain::RentalStatus::active) {
         return {
             RentalErrorCode::CONFLICT,
             "Rental is already completed or cancelled",
@@ -182,10 +182,9 @@ RentalResult RentalService::CompleteRental(const std::string& id) {
         };
     }
     
-    storage.UpdateCarAvailability(rental->car_id, true);
+    storage.UpdateCarAvailability(rental->GetCarId(), true);
     
-    rental->status = domain::RentalStatus::completed;
-    rental->actual_return_date = std::chrono::system_clock::now();
+    rental->SetStatus(domain::RentalStatus::completed); 
     
     return {RentalErrorCode::OK, "", rental};
 }

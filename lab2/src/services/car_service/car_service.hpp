@@ -3,6 +3,7 @@
 #include <optional>
 #include <vector>
 #include <domain/car.hpp>
+#include <docs/definitions/car.hpp>
 
 namespace car_rental::services {
 
@@ -29,7 +30,7 @@ struct CarListResult {
 
 class CarService {
 public:
-    static CarResult CreateCar(const domain::Car& car);
+    static CarResult CreateCar(const lab2::car::CreateCarRequest& dto);
     
     static CarListResult GetAvailableCars(
         bool available_only = true,

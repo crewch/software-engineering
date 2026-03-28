@@ -38,8 +38,6 @@ components:
       $ref: '../docs/definitions/rental.yaml#/components/schemas/Rental'
     CreateRentalRequest:
       $ref: '../docs/definitions/rental.yaml#/components/schemas/CreateRentalRequest'
-    RentalListResponse:
-      $ref: '../docs/definitions/rental.yaml#/components/schemas/RentalListResponse'
 
     ValidationError:
       $ref: '../docs/definitions/errors.yaml#/components/schemas/ValidationError'

@@ -5,6 +5,8 @@
 #include <string>
 #include <domain/user.hpp>
 
+#include <docs/definitions/user.hpp>
+
 namespace car_rental::services {
 
 enum class UserErrorCode {
@@ -31,12 +33,7 @@ struct UserListResult {
 class UserService {
 public:
     static UserResult CreateUser(
-        const std::string& login,
-        const std::string& first_name,
-        const std::string& last_name,
-        const std::string& email,
-        const std::string& phone,
-        const std::string& password
+        const lab2::user::CreateUserRequest& dto
     );
     
     static UserResult GetUserByLogin(const std::string& login);
