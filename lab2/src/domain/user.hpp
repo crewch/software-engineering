@@ -7,6 +7,7 @@
 
 #include <fmt/format.h>
 #include <lib/uuid_generator/uuid_generator.hpp>
+#include <lib/password_hasher/password_hasher.hpp>
 #include <variant>
 #include <domain/exceptions.hpp>
 
@@ -51,14 +52,16 @@ public:
         if (phone.has_value() && !IsValidPhone(phone.value())) {
             return exceptions::domain::ValidationError{"phone", "Invalid phone format"};
         }
-        
+
+        auto hasher = lab2::infrastructure::PasswordHasher();
+
         User user;
         user.id_ = generateUUID();
         user.login_ = login;
         user.first_name_ = first_name;
         user.last_name_ = last_name;
         user.email_ = email;
-        user.password_ = password;
+        user.password_ = hasher.Hash(password);
         user.phone_ = phone;
         user.created_at_ = std::chrono::system_clock::now();
         
@@ -67,6 +70,7 @@ public:
 
     const std::string& GetId() const { return id_; }
     const std::string& GetLogin() const { return login_; }
+    const std::string& GetPassword() const { return password_; }
     const std::string& GetFirstName() const { return first_name_; }
     const std::string& GetLastName() const { return last_name_; }
     const std::string& GetEmail() const { return email_; }

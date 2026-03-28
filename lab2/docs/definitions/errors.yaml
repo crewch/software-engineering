@@ -53,3 +53,14 @@ components:
           type: string
           enum: [already_rented, maintenance, not_found]
           description: Причина недоступности
+
+    UnauthorizedError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [unauthorized]
+        message:
+          type: string
+          example: Invalid credentials

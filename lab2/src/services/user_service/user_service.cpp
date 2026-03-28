@@ -79,4 +79,38 @@ UserListResult UserService::SearchUsers(
     return {UserErrorCode::OK, "", paginated, total};
 }
 
+AuthResult UserService::Login(
+    const lab2::auth::LoginRequest& dto,
+    const std::shared_ptr<lab2::infrastructure::JwtTokenGenerator> jwt_token_generator
+) {
+    auto& storage = storage::InMemoryStorage::Instance();
+    auto user = storage.GetUserByLogin(dto.login);
+
+    if (!user.has_value()) {
+        return {
+            AuthErrorCode::NOT_FOUND,
+            "User not found",
+            std::nullopt
+        };
+    }
+
+    auto hasher = lab2::infrastructure::PasswordHasher();
+
+    if (!hasher.Verify(dto.password, user->GetPassword())) {
+        return  {
+            AuthErrorCode::INVALID_CREDENTIALS,
+            "Invalid credentials",
+            std::nullopt
+        };
+    }
+
+    std::string token = jwt_token_generator->Generate(user->GetId());
+
+    return  {
+        AuthErrorCode::OK,
+        "",
+        token
+    };
+}
+
 } // namespace car_rental::services

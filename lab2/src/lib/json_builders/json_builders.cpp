@@ -26,6 +26,16 @@ userver::formats::json::Value JsonBuilders::BuildUserJson(
     return builder.ExtractValue();
 }
 
+userver::formats::json::Value JsonBuilders::BuildAuthJson(
+    const std::string token
+) {
+    userver::formats::json::ValueBuilder builder;
+    
+    builder["token"] = token;
+    
+    return builder.ExtractValue();
+}
+
 userver::formats::json::Value JsonBuilders::BuildCarJson(
     const domain::Car& car
 ) {
@@ -84,6 +94,16 @@ userver::formats::json::Value JsonBuilders::BuildValidationErrorJson(
 ) {
     userver::formats::json::ValueBuilder builder;
     builder["code"] = "validation_error";
+    builder["message"] = message;
+    
+    return builder.ExtractValue();
+}
+
+userver::formats::json::Value JsonBuilders::BuildUnauthorizedErrorJson(
+    const std::string& message
+) {
+    userver::formats::json::ValueBuilder builder;
+    builder["code"] = "unauthorized_error";
     builder["message"] = message;
     
     return builder.ExtractValue();

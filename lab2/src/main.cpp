@@ -10,6 +10,7 @@
 #include <userver/utils/daemon_run.hpp>
 #include <infrastructure/jwt/jwt_auth_factory.hpp>
 #include <controllers/create_user/create_user.hpp>
+#include <controllers/login/login.hpp>
 #include <controllers/get_user_by_login/get_user_by_login.hpp>
 #include <controllers/create_car/create_car.hpp>
 #include <controllers/get_available_cars/get_available_cars.hpp>
@@ -17,8 +18,7 @@
 #include <controllers/create_rental/create_rental.hpp>
 
 int main(int argc, char* argv[]) {
-  userver::server::handlers::auth::RegisterAuthCheckerFactory<
-      auth::jwt::JwtAuthCheckerFactory>();
+  userver::server::handlers::auth::RegisterAuthCheckerFactory<lab2::infrastructure::JwtAuthCheckerFactory>();
 
   auto component_list =
       userver::components::MinimalServerComponentList()
@@ -28,13 +28,14 @@ int main(int argc, char* argv[]) {
           .Append<userver::clients::dns::Component>()
           .Append<userver::server::handlers::TestsControl>()
           .Append<userver::congestion_control::Component>()
-          .Append<auth::jwt::JwtAuthComponent>()
           .Append<car_rental::components::CreateUser>()
+          .Append<car_rental::components::Login>()
           .Append<car_rental::components::GetUserByLogin>()
           .Append<car_rental::components::CreateCar>()
           .Append<car_rental::components::GetAvailableCars>()
           .Append<car_rental::components::GetCarsByClass>()
-          .Append<car_rental::components::CreateRental>();
+          .Append<car_rental::components::CreateRental>()
+          .Append<lab2::infrastructure::JwtAuthComponent>();
 
   return userver::utils::DaemonMain(argc, argv, component_list);
 }

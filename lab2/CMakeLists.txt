@@ -38,7 +38,6 @@ file(GLOB CONTROLLERS_SOURCES src/controllers/**/*.cpp)
 file(GLOB LIB_SOURCES src/lib/**/*.cpp)
 file(GLOB INFRASTRUCTURE_SOURCES src/infrastructure/**/*.cpp)
 
-
 add_library(
     ${PROJECT_NAME}_objs OBJECT
     

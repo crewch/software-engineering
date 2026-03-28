@@ -25,6 +25,13 @@ components:
     UserListResponse:
       $ref: '../docs/definitions/user.yaml#/components/schemas/UserListResponse'
 
+    LoginRequest:
+      $ref: '../docs/definitions/auth.yaml#/components/schemas/LoginRequest'
+    LoginResponse:
+      $ref: '../docs/definitions/auth.yaml#/components/schemas/LoginResponse'
+    UnauthorizedError:
+      $ref: '../docs/definitions/auth.yaml#/components/schemas/UnauthorizedError'
+
     Car:
       $ref: '../docs/definitions/car.yaml#/components/schemas/Car'
     CreateCarRequest:
@@ -115,6 +122,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '500':
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalError'
+
+  /users/login:
+    post:
+      tags: [users]
+      summary: Аутентификация пользователя
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Неверный логин или пароль
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
         '404':
           description: Пользователь не найден
           content:

@@ -60,23 +60,48 @@ components_manager:
     HandlerGetUserByLogin:
       path: /api/v1/users/by-login/{login}
       method: GET
+      auth:
+        types:
+          - jwt-auth
       task_processor: main-task-processor
     # User
+
+    # Auth
+    HandlerLogin:
+      path: /api/v1/users/login
+      method: POST
+      task_processor: main-task-processor
+
+    jwt-auth-component:
+      load-enabled: true
+      private_key: 'private_key'
+      issuer: 'my-issuer'
+      audience: 'my-audience'
+    # Auth
 
     # Car
     HandlerCreateCar:
       path: /api/v1/cars
       method: POST
+      auth:
+        types:
+          - jwt-auth
       task_processor: main-task-processor
 
     HandlerGetAvailableCars:
       path: /api/v1/cars/available
       method: GET
+      auth:
+        types:
+          - jwt-auth
       task_processor: main-task-processor
 
     HandlerGetCarsByClass:
       path: /api/v1/cars/class/{car_class}
       method: GET
+      auth:
+        types:
+          - jwt-auth
       task_processor: main-task-processor
     # Car
 
@@ -84,10 +109,8 @@ components_manager:
     HandlerCreateRental:
       path: /api/v1/rentals
       method: POST
+      auth:
+        types:
+          - jwt-auth
       task_processor: main-task-processor
     # Rentals
-
-    jwt-auth-checker:
-      load-enabled: true
-      secret: $jwt_secret_key
-      secret#env: JWT_SECRET_KEY

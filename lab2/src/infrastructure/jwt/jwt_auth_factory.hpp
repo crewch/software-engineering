@@ -1,24 +1,25 @@
 #pragma once
 
+#include "jwt.hpp"
+
 #include <userver/server/handlers/auth/auth_checker_factory.hpp>
 
-#include <infrastructure/jwt/jwt_auth_checker.hpp>
-
-namespace auth::jwt {
+namespace lab2::infrastructure {
 
 class JwtAuthCheckerFactory final
     : public userver::server::handlers::auth::AuthCheckerFactoryBase {
- public:
-  static constexpr const char* kAuthType = "jwt-auth";
+public:
+    static constexpr const char* kAuthType = "jwt-auth";
 
-  explicit JwtAuthCheckerFactory(
-      const userver::components::ComponentContext& context);
+    explicit JwtAuthCheckerFactory(
+        const userver::components::ComponentContext& context);
 
-  userver::server::handlers::auth::AuthCheckerBasePtr MakeAuthChecker(
-      const userver::server::handlers::auth::HandlerAuthConfig&) const override;
+    userver::server::handlers::auth::AuthCheckerBasePtr
+    MakeAuthChecker(
+        const userver::server::handlers::auth::HandlerAuthConfig&) const override;
 
- private:
-  auth::jwt::JwtAuthComponent& auth_;
+private:
+    JwtAuthComponent& component_;
 };
 
-}  // namespace auth::jwt
+}  // namespace lab2::infrastructure

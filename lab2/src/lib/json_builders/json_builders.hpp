@@ -22,6 +22,8 @@ class JsonBuilders {
 public:
     static userver::formats::json::Value BuildUserJson(const domain::User& user);
 
+    static userver::formats::json::Value BuildAuthJson(const std::string token);
+
     static userver::formats::json::Value BuildCarJson(const domain::Car& car);
 
     static userver::formats::json::Value BuildCarListJson(
@@ -36,6 +38,10 @@ public:
     );
     
     static userver::formats::json::Value BuildConflictErrorJson(
+        const std::string& message
+    );
+
+    static userver::formats::json::Value BuildUnauthorizedErrorJson(
         const std::string& message
     );
     
