@@ -33,14 +33,14 @@ std::string GetCarsByClass::HandleRequestThrow(
     std::string class_str = request.GetPathArg("car_class");
     
     domain::CarClass  car_class;
-
+    
     try {
         car_class = domain::Car::CarClassFromString(class_str);
-    } catch (std::string declartion) {
+    } catch (const userver::formats::json::Exception& e) {
         request.SetResponseStatus(userver::server::http::HttpStatus::kBadRequest);
         return userver::formats::json::ToString(
             car_rental::utils::JsonBuilders::BuildValidationErrorJson(
-                declartion
+                e.what()
             )
         );
     }
