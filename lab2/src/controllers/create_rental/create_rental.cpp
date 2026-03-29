@@ -24,7 +24,7 @@ CreateRental::CreateRental(
 
 std::string CreateRental::HandleRequestThrow(
     const userver::server::http::HttpRequest& request,
-    userver::server::request::RequestContext&) const {
+    userver::server::request::RequestContext& context) const {
     request.GetHttpResponse().SetContentType(
         userver::http::content_type::kApplicationJson
     );
@@ -53,8 +53,11 @@ std::string CreateRental::HandleRequestThrow(
         );
     }
 
+    std::string user_id = context.GetData<std::string>("user_id");
+
     const auto result = services::RentalService::CreateRental(
-        create_rental_dto
+        create_rental_dto,
+        user_id
     );
 
     switch (result.code) {

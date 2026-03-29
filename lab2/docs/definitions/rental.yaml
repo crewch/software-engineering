@@ -43,14 +43,10 @@ components:
     CreateRentalRequest:
       type: object
       required:
-        - user_id
         - car_id
         - start_date
         - end_date
       properties:
-        user_id:
-          $ref: 'common.yaml#/components/schemas/UUID'
-          description: ID пользователя
         car_id:
           $ref: 'common.yaml#/components/schemas/UUID'
           description: ID автомобиля

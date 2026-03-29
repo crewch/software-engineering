@@ -30,9 +30,9 @@ double CalculateTotalCost(double daily_rate, int days) {
 } // anonymous namespace
 
 RentalResult RentalService::CreateRental(
-    const lab2::rental::CreateRentalRequest& dto
+    const lab2::rental::CreateRentalRequest& dto,
+    const std::string& user_id
 ) {  
-    std::string user_id = boost::uuids::to_string(dto.user_id);
     std::string car_id = boost::uuids::to_string(dto.car_id);
 
     auto rental_result = domain::Rental::Create(

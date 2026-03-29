@@ -33,7 +33,8 @@ struct RentalListResult {
 class RentalService {
 public:
     static RentalResult CreateRental(
-        const lab2::rental::CreateRentalRequest& dto
+        const lab2::rental::CreateRentalRequest& dto,
+        const std::string& user_id
     );
     
     static RentalResult GetRentalById(const std::string& id);
