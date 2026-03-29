@@ -1,0 +1,224 @@
+{
+	"info": {
+		"_postman_id": "4a6bfbc9-4d4a-410d-9270-287d9add8356",
+		"name": "/api/v1",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21820039"
+	},
+	"item": [
+		{
+			"name": "/users",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"login\": \"tom\",\r\n    \"first_name\": \"Tom\",\r\n    \"last_name\": \"Crewch\",\r\n    \"email\": \"tom@mail.ru\",\r\n    \"password\": \"12345678\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/users/",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "v1", "users", ""]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/users/login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"login\": \"tom\",\r\n    \"password\": \"12345678\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/users/login",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "v1", "users", "login"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/users/by-login/{login}",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJteS1hdWRpZW5jZSIsImV4cCI6MTc3NDgxMjg1NCwiaWF0IjoxNzc0ODA5MjU0LCJpc3MiOiJteS1pc3N1ZXIiLCJqdGkiOiJMa0Rib3dRLWFRRGFYN0QxbVJ2MVVRJTNkJTNkIiwibmJmIjoxNzc0ODA5MjU0LCJzdWIiOiJmMDdiYzI0NS00MWQwLTQyZTUtYTVjYy0xNzA1ODMwZDc1ZjMifQ.HRJRU7B9ewvPtKfU9zLFWWAIbiroekqAOh99klViInQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/users/by-login/tom",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "v1", "users", "by-login", "tom"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/cars",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJteS1hdWRpZW5jZSIsImV4cCI6MTc3NDgxMjk2MCwiaWF0IjoxNzc0ODA5MzYwLCJpc3MiOiJteS1pc3N1ZXIiLCJqdGkiOiJvQjhSZE9KczktT0tjQURoZWdpX0NnJTNkJTNkIiwibmJmIjoxNzc0ODA5MzYwLCJzdWIiOiI0ZmNiNmQxNS0wZmEyLTRkNWMtYmE2OS0wNGNlNDdlMDllMjIifQ.bJaEsTzBa3Ikj5BaB2MhaNizNhbjssIH2Yj5F013Bmo",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"vin\": \"14333678033344832\",\r\n    \"brand\": \"mazda\",\r\n    \"model\": \"rx7\",\r\n    \"year\": 2023,\r\n    \"car_class\": \"midsize\",\r\n    \"license_plate\": \"12312312\",\r\n    \"daily_rate\": 50\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/cars",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "v1", "cars"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/cars/available",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJteS1hdWRpZW5jZSIsImV4cCI6MTc3NDgxMjk2MCwiaWF0IjoxNzc0ODA5MzYwLCJpc3MiOiJteS1pc3N1ZXIiLCJqdGkiOiJvQjhSZE9KczktT0tjQURoZWdpX0NnJTNkJTNkIiwibmJmIjoxNzc0ODA5MzYwLCJzdWIiOiI0ZmNiNmQxNS0wZmEyLTRkNWMtYmE2OS0wNGNlNDdlMDllMjIifQ.bJaEsTzBa3Ikj5BaB2MhaNizNhbjssIH2Yj5F013Bmo",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/cars/available?limit=10&offset=0",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "v1", "cars", "available"],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "offset",
+							"value": "0"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/cars/class/{car_class}",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJteS1hdWRpZW5jZSIsImV4cCI6MTc3NDgxMjk2MCwiaWF0IjoxNzc0ODA5MzYwLCJpc3MiOiJteS1pc3N1ZXIiLCJqdGkiOiJvQjhSZE9KczktT0tjQURoZWdpX0NnJTNkJTNkIiwibmJmIjoxNzc0ODA5MzYwLCJzdWIiOiI0ZmNiNmQxNS0wZmEyLTRkNWMtYmE2OS0wNGNlNDdlMDllMjIifQ.bJaEsTzBa3Ikj5BaB2MhaNizNhbjssIH2Yj5F013Bmo",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/cars/class/midsize?limit=10&offset=0",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "v1", "cars", "class", "midsize"],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "offset",
+							"value": "0"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/rentals",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJteS1hdWRpZW5jZSIsImV4cCI6MTc3NDgxNjI5MCwiaWF0IjoxNzc0ODEyNjkwLCJpc3MiOiJteS1pc3N1ZXIiLCJqdGkiOiJObFhKT3M5QUhhWnNyWk9rWTdYVktnJTNkJTNkIiwibmJmIjoxNzc0ODEyNjkwLCJzdWIiOiI4MTlmMjMwYi1hZDIwLTQ3YjUtOTgxYS05MDc1NTBiNGFkYWEifQ.b7JglFLZ3DsL5_Cw8jsirh2fGI9T7DrecBozdSgNSgE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"car_id\": \"4fde9011-f651-41a6-84f3-acf683d38a47\",\r\n    \"start_date\": \"2026-03-21T17:54:32.555051082+00:00\",\r\n    \"end_date\": \"2026-03-25T17:54:32.555051082+00:00\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/rentals",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "v1", "rentals"]
+				}
+			},
+			"response": []
+		}
+	]
+}
