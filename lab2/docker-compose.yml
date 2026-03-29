@@ -1,0 +1,37 @@
+services:
+  api:
+    container_name: car-rental-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - CCACHE_DIR=/home/user/lab2/.ccache
+      - CORES_DIR=/cores
+      - PREFIX=${PREFIX:-~/.local}
+      - SHELL=/bin/bash
+    ports:
+      - '8080:8080'
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined
+    volumes:
+      - ccache-volume:/home/user/lab2/.ccache
+      - cores-volume:/cores
+    working_dir: /home/user/lab2
+    user: user
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/ping']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+    logging:
+      driver: 'local'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+volumes:
+  ccache-volume:
+  cores-volume:
