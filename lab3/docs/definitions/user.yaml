@@ -1,0 +1,93 @@
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - login
+        - first_name
+        - last_name
+        - email
+        - created_at
+      properties:
+        id:
+          $ref: 'common.yaml#/components/schemas/UUID'
+          description: UUID пользователя
+        login:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9_-]+$'
+          description: Логин пользователя (3-50 символов)
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Имя
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Фамилия
+        email:
+          type: string
+          maxLength: 255
+          description: Email адрес
+        phone:
+          type: string
+          pattern: '^\+?[0-9\s\-()]{10,20}$'
+          description: Номер телефона
+        created_at:
+          $ref: 'common.yaml#/components/schemas/DateTime'
+          description: Время создания аккаунта
+
+    CreateUserRequest:
+      type: object
+      required:
+        - login
+        - first_name
+        - last_name
+        - email
+        - password
+      properties:
+        login:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9_-]+$'
+          description: Логин пользователя (3-50 символов)
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Имя
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Фамилия
+        email:
+          type: string
+          maxLength: 255
+          description: Email адрес
+        phone:
+          type: string
+          pattern: '^\+?[0-9\s\-()]{10,20}$'
+          description: Номер телефона
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: Пароль (8-128 символов)
+
+    UserListResponse:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        total:
+          type: integer
+          description: Общее количество пользователей

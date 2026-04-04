@@ -1,0 +1,58 @@
+components:
+  schemas:
+    RentalStatus:
+      type: string
+      enum: [active, completed, cancelled]
+      description: Статус аренды
+
+    Rental:
+      type: object
+      required:
+        - id
+        - user_id
+        - car_id
+        - start_date
+        - end_date
+        - total_cost
+        - status
+        - created_at
+      properties:
+        id:
+          $ref: 'common.yaml#/components/schemas/UUID'
+        user_id:
+          $ref: 'common.yaml#/components/schemas/UUID'
+          description: ID пользователя
+        car_id:
+          $ref: 'common.yaml#/components/schemas/UUID'
+          description: ID автомобиля
+        start_date:
+          $ref: 'common.yaml#/components/schemas/DateTime'
+          description: Начало аренды
+        end_date:
+          $ref: 'common.yaml#/components/schemas/DateTime'
+          description: Ожидаемое окончание аренды
+        total_cost:
+          type: number
+          minimum: 0
+          description: Общая стоимость аренды
+        status:
+          $ref: '#/components/schemas/RentalStatus'
+        created_at:
+          $ref: 'common.yaml#/components/schemas/DateTime'
+
+    CreateRentalRequest:
+      type: object
+      required:
+        - car_id
+        - start_date
+        - end_date
+      properties:
+        car_id:
+          $ref: 'common.yaml#/components/schemas/UUID'
+          description: ID автомобиля
+        start_date:
+          $ref: 'common.yaml#/components/schemas/DateTime'
+          description: Начало аренды
+        end_date:
+          $ref: 'common.yaml#/components/schemas/DateTime'
+          description: Ожидаемое окончание аренды

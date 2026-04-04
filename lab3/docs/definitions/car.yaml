@@ -1,0 +1,94 @@
+components:
+  schemas:
+    CarClass:
+      type: string
+      enum: [economy, compact, midsize, fullsize, luxury, suv, van]
+
+    Car:
+      type: object
+      required:
+        - id
+        - vin
+        - brand
+        - model
+        - year
+        - car_class
+        - license_plate
+        - daily_rate
+        - available
+        - created_at
+      properties:
+        id:
+          $ref: 'common.yaml#/components/schemas/UUID'
+        vin:
+          type: string
+          pattern: '^[A-HJ-NPR-Z0-9]{17}$'
+        brand:
+          type: string
+          minLength: 1
+          maxLength: 50
+        model:
+          type: string
+          minLength: 1
+          maxLength: 50
+        year:
+          type: integer
+          minimum: 1900
+          maximum: 2030
+        car_class:
+          $ref: '#/components/schemas/CarClass'
+        license_plate:
+          type: string
+        daily_rate:
+          type: number
+          minimum: 0
+        available:
+          type: boolean
+          default: true
+        created_at:
+          $ref: 'common.yaml#/components/schemas/DateTime'
+
+    CreateCarRequest:
+      type: object
+      required:
+        - vin
+        - brand
+        - model
+        - year
+        - car_class
+        - license_plate
+        - daily_rate
+      properties:
+        vin:
+          type: string
+          pattern: '^[A-HJ-NPR-Z0-9]{17}$'
+        brand:
+          type: string
+          minLength: 1
+          maxLength: 50
+        model:
+          type: string
+          minLength: 1
+          maxLength: 50
+        year:
+          type: integer
+          minimum: 1900
+          maximum: 2030
+        car_class:
+          $ref: '#/components/schemas/CarClass'
+        license_plate:
+          type: string
+        daily_rate:
+          type: number
+          minimum: 0
+
+    CarListResponse:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Car'
+        total:
+          type: integer

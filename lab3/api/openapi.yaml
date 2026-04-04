@@ -1,0 +1,371 @@
+openapi: 3.0.4
+
+info:
+  title: Car Rental API
+  version: 1.0.0
+  description: API для системы управления арендой автомобилей
+
+servers:
+  - url: /api/v1
+
+tags:
+  - name: users
+    description: Операции с пользователями
+  - name: cars
+    description: Операции с автомобилями
+  - name: rentals
+    description: Операции с арендами
+
+components:
+  schemas:
+    User:
+      $ref: '../docs/definitions/user.yaml#/components/schemas/User'
+    CreateUserRequest:
+      $ref: '../docs/definitions/user.yaml#/components/schemas/CreateUserRequest'
+    UserListResponse:
+      $ref: '../docs/definitions/user.yaml#/components/schemas/UserListResponse'
+
+    LoginRequest:
+      $ref: '../docs/definitions/auth.yaml#/components/schemas/LoginRequest'
+    LoginResponse:
+      $ref: '../docs/definitions/auth.yaml#/components/schemas/LoginResponse'
+
+    Car:
+      $ref: '../docs/definitions/car.yaml#/components/schemas/Car'
+    CreateCarRequest:
+      $ref: '../docs/definitions/car.yaml#/components/schemas/CreateCarRequest'
+    CarClass:
+      $ref: '../docs/definitions/car.yaml#/components/schemas/CarClass'
+    CarListResponse:
+      $ref: '../docs/definitions/car.yaml#/components/schemas/CarListResponse'
+
+    Rental:
+      $ref: '../docs/definitions/rental.yaml#/components/schemas/Rental'
+    CreateRentalRequest:
+      $ref: '../docs/definitions/rental.yaml#/components/schemas/CreateRentalRequest'
+
+    ValidationError:
+      $ref: '../docs/definitions/errors.yaml#/components/schemas/ValidationError'
+    NotFoundError:
+      $ref: '../docs/definitions/errors.yaml#/components/schemas/NotFoundError'
+    ConflictError:
+      $ref: '../docs/definitions/errors.yaml#/components/schemas/ConflictError'
+    CarNotAvailableError:
+      $ref: '../docs/definitions/errors.yaml#/components/schemas/CarNotAvailableError'
+    InternalError:
+      $ref: '../docs/definitions/errors.yaml#/components/schemas/InternalError'
+    UnauthorizedError:
+      $ref: '../docs/definitions/auth.yaml#/components/schemas/UnauthorizedError'
+
+paths:
+  /users:
+    post:
+      tags: [users]
+      summary: Создание пользователя
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: Пользователь создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '409':
+          description: Конфликт (login существует)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictError'
+        '500':
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalError'
+
+  /users/login:
+    post:
+      tags: [users]
+      summary: Аутентификация пользователя
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Неверный логин или пароль
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '500':
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalError'
+
+  /users/by-login/{login}:
+    get:
+      tags: [users]
+      summary: Получить пользователя по логину
+      operationId: getUserByLogin
+      parameters:
+        - name: login
+          in: path
+          required: true
+          description: Логин пользователя (3-50 символов)
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 50
+      responses:
+        '200':
+          description: Пользователь найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Некорректный логин
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Ошибка аутентификации
+        '403':
+          description: Невалидный токен
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '500':
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalError'
+
+  /cars:
+    post:
+      tags: [cars]
+      summary: Создание автомобиля
+      operationId: createCar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCarRequest'
+      responses:
+        '201':
+          description: Автомобиль создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Car'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Ошибка аутентификации
+        '403':
+          description: Невалидный токен
+        '409':
+          description: Конфликт (VIN существует)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictError'
+        '500':
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalError'
+
+  /cars/available:
+    get:
+      tags: [cars]
+      summary: Получение списка доступных автомобилей
+      operationId: getCars
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Количество записей на странице
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          required: false
+          description: Смещение от начала списка
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: Список доступных автомобилей
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarListResponse'
+        '400':
+          description: Ошибка валидации параметров
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Ошибка аутентификации
+        '403':
+          description: Невалидный токен
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalError'
+
+  /cars/class/{car_class}:
+    get:
+      tags: [cars]
+      summary: Поиск автомобилей по классу
+      operationId: getCarsByClass
+      parameters:
+        - name: car_class
+          in: path
+          required: true
+          description: Класс автомобиля для поиска
+          schema:
+            $ref: '#/components/schemas/CarClass'
+        - name: limit
+          in: query
+          required: false
+          description: Количество записей на странице
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          required: false
+          description: Смещение от начала списка
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: Список автомобилей указанного класса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarListResponse'
+        '400':
+          description: Некорректный класс автомобиля
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Ошибка аутентификации
+        '403':
+          description: Невалидный токен
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalError'
+
+  /rentals:
+    post:
+      tags: [rentals]
+      summary: Создать аренду
+      operationId: createRental
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRentalRequest'
+      responses:
+        '201':
+          description: Аренда создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rental'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Ошибка аутентификации
+        '403':
+          description: Невалидный токен
+        '404':
+          description: Пользователь или автомобиль не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '409':
+          description: Автомобиль недоступен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarNotAvailableError'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalError'
